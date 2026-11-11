@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { actualizarIE, eliminarIE } from '../../data/repos';
+import { Link, useParams } from 'react-router-dom';
+import { actualizarIE } from '../../data/repos';
 import { Campo, Icon, useToast } from '../../shared/ui';
 import { comunaLbl } from '../../shared/texto';
 import { progreso, type Datos } from '../../shared/useDatos';
@@ -9,9 +9,7 @@ import Docentes from './Docentes';
 
 export default function FichaIE({ d }: { d: Datos }) {
   const { id } = useParams();
-  const nav = useNavigate();
   const toast = useToast();
-  const [confirmar, setConfirmar] = useState(false);
   const [editando, setEditando] = useState<{ nombre: string; comuna: string } | null>(null);
   const ie = d.ies.find((x) => x.id === id);
   if (!ie) return <div className="empty"><b>No encontré esta IE</b><Link to="/instituciones">Volver a las instituciones</Link></div>;
@@ -94,19 +92,6 @@ export default function FichaIE({ d }: { d: Datos }) {
         <Link className="btn pri" to="/instituciones">Listo, volver a las IE</Link>
       </div>
 
-      <div className="peligro">
-        <div><b>Eliminar esta IE</b><span>Se borra con todas sus sedes, espacios y el Excel de docentes. No se puede deshacer.</span></div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          {confirmar && <button className="btn" onClick={() => setConfirmar(false)}>Cancelar</button>}
-          <button className={'btn ' + (confirmar ? 'danger' : 'warn')} onClick={async () => {
-            if (!confirmar) { setConfirmar(true); return; }
-            const nombre = ie.nombre;
-            await eliminarIE(ie.id);
-            toast(nombre + ' eliminada');
-            nav('/instituciones');
-          }}>{confirmar ? 'Sí, eliminar la IE' : 'Eliminar IE'}</button>
-        </div>
-      </div>
     </div>
   );
 }
