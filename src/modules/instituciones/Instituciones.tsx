@@ -22,8 +22,11 @@ export default function Instituciones({ d }: { d: Datos }) {
       (!nq || norm(ie.nombre + ' ' + sedesDe(ie.id).map((s) => s.nombre).join(' ')).includes(nq)));
   const comunasConIE = d.comunas.filter((c) => d.ies.some((ie) => ie.comuna_id === c.id));
 
-  const nueva = async () => {
-    const ie = await crearIE('IE nueva', comuna || '1', ['Sede Principal']);
+  const [form, setForm] = useState<{ nombre: string; comuna: string; sede: string } | null>(null);
+  const guardarNueva = async () => {
+    if (!form || !form.nombre.trim()) return;
+    const ie = await crearIE(form.nombre.trim(), form.comuna, [form.sede.trim() || 'Sede Principal']);
+    setForm(null);
     nav(`/ie/${ie.id}`);
   };
 
@@ -31,8 +34,27 @@ export default function Instituciones({ d }: { d: Datos }) {
     <>
       <div className="head">
         <div><h1>Instituciones</h1><div className="muted">{d.ies.length} IE, ordenadas por comuna</div></div>
-        <button className="btn" onClick={nueva}><Icon n="plus" /> Agregar IE</button>
+        {!form && <button className="btn" onClick={() => setForm({ nombre: '', comuna: comuna || '1', sede: 'Sede Principal' })}><Icon n="plus" /> Agregar IE</button>}
       </div>
+      {form && (
+        <form className="panel nueva-ie" onSubmit={(e) => { e.preventDefault(); void guardarNueva(); }}>
+          <h3>Nueva institución</h3>
+          <div className="f3">
+            <div><label className="lbl" htmlFor="n-nom">Nombre de la IE</label>
+              <input className="inp" id="n-nom" autoFocus value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Institución Educativa…" /></div>
+            <div><label className="lbl" htmlFor="n-com">Comuna</label>
+              <select className="inp" style={{ width: '100%' }} id="n-com" value={form.comuna} onChange={(e) => setForm({ ...form, comuna: e.target.value })}>
+                {d.comunas.map((c) => <option key={c.id} value={c.id}>{comunaLbl(c.id)}</option>)}
+              </select></div>
+            <div><label className="lbl" htmlFor="n-sede">Sede principal</label>
+              <input className="inp" id="n-sede" value={form.sede} onChange={(e) => setForm({ ...form, sede: e.target.value })} /></div>
+          </div>
+          <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
+            <button className="btn pri" disabled={!form.nombre.trim()}>Guardar IE</button>
+            <button type="button" className="btn" onClick={() => setForm(null)}>Cancelar</button>
+          </div>
+        </form>
+      )}
       <div className="filters">
         <label className="search" htmlFor="q"><Icon n="search" />
           <input id="q" placeholder="Buscar IE o sede" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" />

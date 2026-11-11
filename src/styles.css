@@ -273,3 +273,15 @@ select.inp{width:auto}
 .ietitle .ie-nombre{background:transparent;border:0;border-bottom:2px solid transparent;border-radius:0;color:#fff;font-family:var(--display);font-weight:700;font-size:clamp(26px,3.8vw,38px);line-height:1.15;padding:0 0 2px;letter-spacing:-.015em}
 .ietitle .ie-nombre:focus{box-shadow:none;border-bottom-color:rgba(255,255,255,.6)}
 button.drop{font:inherit;color:inherit}
+
+/* eliminar y nueva IE */
+.btn.danger{background:var(--coral);border-color:var(--coral);color:#fff}
+.btn.danger:hover{background:#B9442B}
+.peligro{margin-top:48px;border:1px solid #F0C4B8;background:#FFF7F5;border-radius:16px;padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.peligro b{display:block;color:#8E3420}
+.peligro span{color:var(--muted);font-size:14px}
+.del-sede{display:flex;gap:6px;align-items:flex-end;margin-left:auto}
+.nueva-ie{margin-bottom:20px;border-color:var(--azul);box-shadow:0 0 0 4px var(--azul-suave)}
+.nueva-ie h3{font-size:19px;margin-bottom:14px}
+.ie-comuna{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:9px;padding:3px 8px;font:inherit;cursor:pointer}
+.ie-comuna option{color:var(--ink)}

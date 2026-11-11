@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { actualizarSede, agregarEspacio, crearSede, quitarEspacio, tipoPorNombre } from '../../data/repos';
+import { actualizarSede, agregarEspacio, crearSede, eliminarSede, quitarEspacio, tipoPorNombre } from '../../data/repos';
 import type { Institucion, Sede } from '../../data/types';
 import { Campo, Icon, useToast } from '../../shared/ui';
 import type { Datos } from '../../shared/useDatos';
@@ -10,6 +10,7 @@ export default function Sedes({ ie, sedes, d }: { ie: Institucion; sedes: Sede[]
   const [sel, setSel] = useState<string | undefined>(sedes[0]?.id);
   const [otroCat, setOtroCat] = useState<string | null>(null);
   const [otro, setOtro] = useState('');
+  const [borrar, setBorrar] = useState(false);
   const toast = useToast();
   useEffect(() => { if (!sedes.some((s) => s.id === sel)) setSel(sedes[0]?.id); }, [sedes, sel]);
   const s = sedes.find((x) => x.id === sel);
@@ -25,7 +26,7 @@ export default function Sedes({ ie, sedes, d }: { ie: Institucion; sedes: Sede[]
       {sedes.map((x) => {
         const n = d.espacios.filter((e) => e.sede_id === x.id).length;
         return (
-          <button key={x.id} className={x.id === sel ? 'on' : ''} onClick={() => { setSel(x.id); setOtroCat(null); }}>
+          <button key={x.id} className={x.id === sel ? 'on' : ''} onClick={() => { setSel(x.id); setOtroCat(null); setBorrar(false); }}>
             <b>{x.nombre}</b><small>{x.principal ? 'Principal · ' : ''}{n} {n === 1 ? 'espacio' : 'espacios'}</small>
           </button>
         );
@@ -63,6 +64,16 @@ export default function Sedes({ ie, sedes, d }: { ie: Institucion; sedes: Sede[]
               <span className="num">{s.bloques}</span>
               <button onClick={() => set({ bloques: s.bloques + 1 })} aria-label="Agregar un bloque">+</button>
             </div></div>
+          <div className="del-sede">
+            {borrar && <button className="btn sm" onClick={() => setBorrar(false)}>Cancelar</button>}
+            <button className={'btn sm ' + (borrar ? 'danger' : 'ghost warn')} onClick={async () => {
+              if (!borrar) { setBorrar(true); return; }
+              const nombre = s.nombre;
+              await eliminarSede(s.id);
+              setBorrar(false);
+              toast(nombre + ' eliminada');
+            }}>{borrar ? `Sí, eliminar ${s.nombre}` : 'Eliminar sede'}</button>
+          </div>
         </div>
 
         <div className="conect">

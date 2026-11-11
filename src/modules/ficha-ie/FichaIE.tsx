@@ -1,6 +1,7 @@
-import { Link, useParams } from 'react-router-dom';
-import { actualizarIE } from '../../data/repos';
-import { Campo, Icon } from '../../shared/ui';
+import { useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { actualizarIE, eliminarIE } from '../../data/repos';
+import { Campo, Icon, useToast } from '../../shared/ui';
 import { comunaLbl } from '../../shared/texto';
 import { progreso, type Datos } from '../../shared/useDatos';
 import Sedes from './Sedes';
@@ -8,6 +9,9 @@ import Docentes from './Docentes';
 
 export default function FichaIE({ d }: { d: Datos }) {
   const { id } = useParams();
+  const nav = useNavigate();
+  const toast = useToast();
+  const [confirmar, setConfirmar] = useState(false);
   const ie = d.ies.find((x) => x.id === id);
   if (!ie) return <div className="empty"><b>No encontré esta IE</b><Link to="/instituciones">Volver a las instituciones</Link></div>;
   const sedes = d.sedes.filter((s) => s.institucion_id === ie.id);
@@ -22,7 +26,12 @@ export default function FichaIE({ d }: { d: Datos }) {
       </div>
       <div className="ietitle">
         <Campo valor={ie.nombre} onGuardar={(v) => set({ nombre: v || 'IE sin nombre' })} className="ie-nombre" aria-label="Nombre de la IE" />
-        <p>{comunaLbl(ie.comuna_id)} · {sedes.length} {sedes.length === 1 ? 'sede' : 'sedes'}{ie.dane ? ' · DANE ' + ie.dane : ''}</p>
+        <p>
+          <select className="ie-comuna" value={ie.comuna_id} onChange={(e) => set({ comuna_id: e.target.value })} aria-label="Comuna de la IE" title="Cambiar la comuna">
+            {d.comunas.map((c) => <option key={c.id} value={c.id}>{comunaLbl(c.id)}</option>)}
+          </select>
+          {' · '}{sedes.length} {sedes.length === 1 ? 'sede' : 'sedes'}{ie.dane ? ' · DANE ' + ie.dane : ''}
+        </p>
       </div>
 
       <section className="sec">
@@ -63,6 +72,20 @@ export default function FichaIE({ d }: { d: Datos }) {
       <div className="endbar">
         <span className="muted">{p.estado === 'ok' ? 'Esta IE ya tiene toda la información.' : 'Falta: ' + p.falta.join(', ') + '.'}</span>
         <Link className="btn pri" to="/instituciones">Listo, volver a las IE</Link>
+      </div>
+
+      <div className="peligro">
+        <div><b>Eliminar esta IE</b><span>Se borra con todas sus sedes, espacios y el Excel de docentes. No se puede deshacer.</span></div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {confirmar && <button className="btn" onClick={() => setConfirmar(false)}>Cancelar</button>}
+          <button className={'btn ' + (confirmar ? 'danger' : 'warn')} onClick={async () => {
+            if (!confirmar) { setConfirmar(true); return; }
+            const nombre = ie.nombre;
+            await eliminarIE(ie.id);
+            toast(nombre + ' eliminada');
+            nav('/instituciones');
+          }}>{confirmar ? 'Sí, eliminar la IE' : 'Eliminar IE'}</button>
+        </div>
       </div>
     </div>
   );

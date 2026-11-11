@@ -36,6 +36,32 @@ export async function actualizarSede(id: string, cambios: Partial<Sede>) {
   if (s) await guardar('sedes', { ...s, ...cambios });
 }
 
+/** Borra la IE con todas sus sedes, espacios y el Excel de docentes. */
+export async function eliminarIE(id: string) {
+  const sedes = await db.sedes.where('institucion_id').equals(id).toArray();
+  const archivo = await db.archivos.where('institucion_id').equals(id).first();
+  if (archivo && navigator.onLine) await supabase.storage.from('docentes').remove([archivo.ruta_archivo]).catch(() => {});
+  await db.transaction('rw', [db.espacios, db.sedes, db.archivos], async () => {
+    for (const s of sedes) await db.espacios.where('sede_id').equals(s.id).delete();
+    await db.sedes.where('institucion_id').equals(id).delete();
+    await db.archivos.where('institucion_id').equals(id).delete();
+  });
+  // En la nube, al borrar la IE se borran solas sus sedes, espacios y archivo
+  await borrar('instituciones', id);
+}
+
+/** Borra una sede con sus espacios. Si era la principal, la siguiente pasa a ser principal. */
+export async function eliminarSede(id: string) {
+  const s = await db.sedes.get(id);
+  if (!s) return;
+  await db.espacios.where('sede_id').equals(id).delete();
+  await borrar('sedes', id);
+  if (s.principal) {
+    const resto = (await db.sedes.where('institucion_id').equals(s.institucion_id).toArray()).sort((a, b) => a.orden - b.orden);
+    if (resto[0]) await actualizarSede(resto[0].id, { principal: true });
+  }
+}
+
 /* ---------- Espacios ---------- */
 export async function agregarEspacio(sede_id: string, tipo_espacio_id: string) {
   const e: EspacioSede = { id: nuevoId(), sede_id, tipo_espacio_id };
