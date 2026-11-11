@@ -99,4 +99,75 @@ async function bajar() {
   const datos = await Promise.all(nombres.map((t) => traerTodo(REMOTA[t])));
   // Si mientras bajábamos alguien editó localmente, no pisamos sus cambios
   if ((await db.outbox.count()) > 0) return;
-  await
+  await db.transaction('rw', nombres.map((t) => db.table(t)), async () => {
+    for (let i = 0; i < nombres.length; i++) {
+      const t = db.table(nombres[i]);
+      await t.clear();
+      await t.bulkPut(datos[i]);
+    }
+  });
+}
+
+let corriendo = false;
+export async function sincronizar() {
+  if (corriendo) return;
+  if (!navigator.onLine) { cambiar({ online: false }); return; }
+  corriendo = true;
+  cambiar({ sincronizando: true, online: true });
+  try {
+    await subir();
+    await bajar();
+    cambiar({ error: null, ultima: Date.now() });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    const red = esDeRed(msg) || msg === 'sin conexión';
+    cambiar({ error: red ? null : msg, online: navigator.onLine && !red });
+  } finally {
+    corriendo = false;
+    cambiar({ sincronizando: false, pendientes: await db.outbox.count() });
+  }
+}
+
+/* ---------- Tiempo real: los cambios de los demás llegan al instante ---------- */
+const LOCAL: Record<string, Tabla> = Object.fromEntries(
+  (Object.keys(REMOTA) as Tabla[]).map((t) => [REMOTA[t], t]),
+) as Record<string, Tabla>;
+
+type Cambio = { table: string; eventType: 'INSERT' | 'UPDATE' | 'DELETE'; new: Record<string, unknown>; old: Record<string, unknown> };
+
+async function aplicarCambio(c: Cambio) {
+  const tabla = LOCAL[c.table];
+  if (!tabla) return;
+  const id = String((c.eventType === 'DELETE' ? c.old : c.new).id ?? '');
+  if (!id) return;
+  // Si esta fila tiene cambios propios sin subir, mandan los propios
+  const pendiente = await db.outbox.where('fila_id').equals(id).count();
+  if (pendiente) return;
+  if (c.eventType === 'DELETE') await db.table(tabla).delete(id);
+  else await db.table(tabla).put(c.new);
+}
+
+function escucharTiempoReal() {
+  supabase
+    .channel('cambios-visitas')
+    .on('postgres_changes', { event: '*', schema: 'public' }, (payload) => { void aplicarCambio(payload as unknown as Cambio); })
+    .subscribe((estadoCanal) => {
+      // Al reconectar, se trae todo por si algo se perdió mientras tanto
+      if (estadoCanal === 'SUBSCRIBED') programar(300);
+    });
+}
+
+let iniciado = false;
+export function iniciarSync() {
+  if (iniciado) return;
+  iniciado = true;
+  window.addEventListener('online', () => { cambiar({ online: true }); programar(200); });
+  window.addEventListener('offline', () => cambiar({ online: false }));
+  // Al volver a la app (cambiar de pestaña, desbloquear el celular) se sincroniza de una
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') programar(100); });
+  window.addEventListener('focus', () => programar(100));
+  setInterval(() => { void sincronizar(); }, 20000);
+  void db.outbox.count().then((n) => cambiar({ pendientes: n }));
+  escucharTiempoReal();
+  void sincronizar();
+}
