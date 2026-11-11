@@ -19,15 +19,9 @@ export function Icon({ n, size }: { n: keyof typeof PATHS; size?: number }) {
   );
 }
 
-export function Logo({ size = 40 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true">
-      <rect width="40" height="40" rx="12" fill="#1F5FAD" />
-      <rect x="9" y="20" width="5" height="11" rx="2.5" fill="#fff" />
-      <rect x="17.5" y="13" width="5" height="18" rx="2.5" fill="#EFA02F" />
-      <rect x="26" y="9" width="5" height="22" rx="2.5" fill="#fff" />
-    </svg>
-  );
+/** Logo completo de EduData Cali. */
+export function Logo({ alto = 32 }: { alto?: number }) {
+  return <img src="/logo-edudata.png" alt="EduData Cali" height={alto} style={{ height: alto, width: 'auto', display: 'block' }} />;
 }
 
 /* ---------- Avisos ---------- */

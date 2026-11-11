@@ -39,8 +39,8 @@ function Entrar() {
   return (
     <div className="login">
       <form className="box" onSubmit={enviar}>
-        <Logo size={48} />
-        <h1>Visitas EduData Cali</h1>
+        <Logo alto={44} />
+        <h1>Visitas a las IE</h1>
         <p className="muted" style={{ margin: 0 }}>Escribe el código del equipo. Solo se pide una vez en cada celular o computador.</p>
         <input className="inp" type="password" placeholder="Código del equipo" value={clave} onChange={(e) => setClave(e.target.value)} autoFocus />
         {error && <div className="err">{error}</div>}
@@ -76,7 +76,7 @@ function Marco() {
   return (
     <div className="app">
       <aside className="side">
-        <div className="brand"><Logo /><div><b>EduData Cali</b><small>Visitas a las IE</small></div></div>
+        <div className="brand"><Logo alto={30} /><small>Visitas a las IE</small></div>
         <nav className="nav">{links(false)}</nav>
         <div className="side-foot">
           <EstadoNube />
@@ -85,7 +85,7 @@ function Marco() {
         </div>
       </aside>
       <main>
-        <div className="mtop"><Logo size={32} /><b>Visitas EduData</b><EstadoNube /></div>
+        <div className="mtop"><Logo alto={26} /><EstadoNube /></div>
         {!d ? <div className="loading">Cargando…</div> : (
           <Routes>
             <Route path="/" element={<Inicio d={d} />} />

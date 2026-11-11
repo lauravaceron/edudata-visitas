@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg'],
+      includeAssets: ['favicon.png', 'logo-edudata.png'],
       manifest: {
         name: 'Visitas EduData Cali',
         short_name: 'Visitas IE',
