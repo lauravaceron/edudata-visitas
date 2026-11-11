@@ -12,6 +12,7 @@ export default function FichaIE({ d }: { d: Datos }) {
   const nav = useNavigate();
   const toast = useToast();
   const [confirmar, setConfirmar] = useState(false);
+  const [editando, setEditando] = useState<{ nombre: string; comuna: string } | null>(null);
   const ie = d.ies.find((x) => x.id === id);
   if (!ie) return <div className="empty"><b>No encontré esta IE</b><Link to="/instituciones">Volver a las instituciones</Link></div>;
   const sedes = d.sedes.filter((s) => s.institucion_id === ie.id);
@@ -25,13 +26,32 @@ export default function FichaIE({ d }: { d: Datos }) {
         <span className="saved"><Icon n="check" size={16} /> Se guarda solo</span>
       </div>
       <div className="ietitle">
-        <Campo valor={ie.nombre} onGuardar={(v) => set({ nombre: v || 'IE sin nombre' })} className="ie-nombre" aria-label="Nombre de la IE" />
-        <p>
-          <select className="ie-comuna" value={ie.comuna_id} onChange={(e) => set({ comuna_id: e.target.value })} aria-label="Comuna de la IE" title="Cambiar la comuna">
-            {d.comunas.map((c) => <option key={c.id} value={c.id}>{comunaLbl(c.id)}</option>)}
-          </select>
-          {' · '}{sedes.length} {sedes.length === 1 ? 'sede' : 'sedes'}{ie.dane ? ' · DANE ' + ie.dane : ''}
-        </p>
+        {!editando ? (
+          <>
+            <h1>{ie.nombre}</h1>
+            <p>{comunaLbl(ie.comuna_id)} · {sedes.length} {sedes.length === 1 ? 'sede' : 'sedes'}{ie.dane ? ' · DANE ' + ie.dane : ''}</p>
+            <button className="edit-ie" onClick={() => setEditando({ nombre: ie.nombre, comuna: ie.comuna_id })}>Editar datos de la IE</button>
+          </>
+        ) : (
+          <form className="ie-form" onSubmit={async (e) => {
+            e.preventDefault();
+            if (!editando.nombre.trim()) return;
+            await set({ nombre: editando.nombre.trim(), comuna_id: editando.comuna });
+            setEditando(null);
+            toast('Datos de la IE guardados');
+          }}>
+            <div><label className="lbl" htmlFor="e-nom">Nombre de la IE</label>
+              <input className="inp" id="e-nom" value={editando.nombre} onChange={(e) => setEditando({ ...editando, nombre: e.target.value })} /></div>
+            <div><label className="lbl" htmlFor="e-com">Comuna</label>
+              <select className="inp" style={{ width: '100%' }} id="e-com" value={editando.comuna} onChange={(e) => setEditando({ ...editando, comuna: e.target.value })}>
+                {d.comunas.map((c) => <option key={c.id} value={c.id}>{comunaLbl(c.id)}</option>)}
+              </select></div>
+            <div className="ie-form-btns">
+              <button className="btn" type="button" onClick={() => setEditando(null)}>Cancelar</button>
+              <button className="btn pri" disabled={!editando.nombre.trim()}>Guardar</button>
+            </div>
+          </form>
+        )}
       </div>
 
       <section className="sec">

@@ -12,6 +12,11 @@ export default function Sedes({ ie, sedes, d }: { ie: Institucion; sedes: Sede[]
   const [otro, setOtro] = useState('');
   const [borrar, setBorrar] = useState(false);
   const toast = useToast();
+  // "Institución Educativa X - Sede Principal" → "Sede Principal" (el nombre de la IE ya está arriba)
+  const corto = (n: string) => {
+    const base = ie.nombre.trim();
+    return n.startsWith(base) ? n.slice(base.length).replace(/^[\s\-–—:]+/, '') || n : n;
+  };
   useEffect(() => { if (!sedes.some((s) => s.id === sel)) setSel(sedes[0]?.id); }, [sedes, sel]);
   const s = sedes.find((x) => x.id === sel);
 
@@ -27,7 +32,7 @@ export default function Sedes({ ie, sedes, d }: { ie: Institucion; sedes: Sede[]
         const n = d.espacios.filter((e) => e.sede_id === x.id).length;
         return (
           <button key={x.id} className={x.id === sel ? 'on' : ''} onClick={() => { setSel(x.id); setOtroCat(null); setBorrar(false); }}>
-            <b>{x.nombre}</b><small>{x.principal ? 'Principal · ' : ''}{n} {n === 1 ? 'espacio' : 'espacios'}</small>
+            <b>{corto(x.nombre)}</b><small>{x.principal ? 'Principal · ' : ''}{n} {n === 1 ? 'espacio' : 'espacios'}</small>
           </button>
         );
       })}

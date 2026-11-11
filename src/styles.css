@@ -292,3 +292,9 @@ button.drop{font:inherit;color:inherit}
 #root{min-height:100%}
 .login{min-height:100vh}
 .mtop .sync{font-size:12px;text-align:right}
+
+.edit-ie{margin-top:14px;background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:10px;padding:7px 12px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer}
+.edit-ie:hover{background:rgba(255,255,255,.24)}
+.ie-form{display:grid;grid-template-columns:2fr 1fr auto;gap:14px;align-items:end;background:#fff;color:var(--ink);border-radius:14px;padding:16px}
+.ie-form-btns{display:flex;gap:8px}
+@media (max-width:760px){.ie-form{grid-template-columns:1fr}}
