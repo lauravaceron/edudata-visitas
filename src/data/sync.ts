@@ -99,42 +99,4 @@ async function bajar() {
   const datos = await Promise.all(nombres.map((t) => traerTodo(REMOTA[t])));
   // Si mientras bajábamos alguien editó localmente, no pisamos sus cambios
   if ((await db.outbox.count()) > 0) return;
-  await db.transaction('rw', nombres.map((t) => db.table(t)), async () => {
-    for (let i = 0; i < nombres.length; i++) {
-      const t = db.table(nombres[i]);
-      await t.clear();
-      await t.bulkPut(datos[i]);
-    }
-  });
-}
-
-let corriendo = false;
-export async function sincronizar() {
-  if (corriendo) return;
-  if (!navigator.onLine) { cambiar({ online: false }); return; }
-  corriendo = true;
-  cambiar({ sincronizando: true, online: true });
-  try {
-    await subir();
-    await bajar();
-    cambiar({ error: null, ultima: Date.now() });
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    const red = esDeRed(msg) || msg === 'sin conexión';
-    cambiar({ error: red ? null : msg, online: navigator.onLine && !red });
-  } finally {
-    corriendo = false;
-    cambiar({ sincronizando: false, pendientes: await db.outbox.count() });
-  }
-}
-
-let iniciado = false;
-export function iniciarSync() {
-  if (iniciado) return;
-  iniciado = true;
-  window.addEventListener('online', () => { cambiar({ online: true }); programar(200); });
-  window.addEventListener('offline', () => cambiar({ online: false }));
-  setInterval(() => { void sincronizar(); }, 45000);
-  void db.outbox.count().then((n) => cambiar({ pendientes: n }));
-  void sincronizar();
-}
+  await
