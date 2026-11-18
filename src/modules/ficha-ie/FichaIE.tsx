@@ -54,7 +54,7 @@ export default function FichaIE({ d }: { d: Datos }) {
 
       <section className="sec">
         <h2>La visita</h2>
-        <p className="sub">Cuándo fueron y quién los atendió.</p>
+        <p className="sub">Registra la fecha de la visita y quién te recibió en la institución.</p>
         <div className="panel"><div className="f3">
           <div><label className="lbl" htmlFor="f-fecha">Fecha</label>
             <input className="inp" type="date" id="f-fecha" value={ie.fecha_visita ?? ''} onChange={(e) => set({ fecha_visita: e.target.value || null })} /></div>
@@ -78,13 +78,13 @@ export default function FichaIE({ d }: { d: Datos }) {
 
       <section className="sec">
         <h2>Sedes y espacios</h2>
-        <p className="sub">Escoge la sede y agrégale, uno por uno, los espacios que tiene. Si algo no está en la lista, lo escriben.</p>
+        <p className="sub">Escoge la sede y agrega, uno por uno, los espacios que tiene.</p>
         <Sedes ie={ie} sedes={sedes} d={d} />
       </section>
 
       <section className="sec">
         <h2>Docentes</h2>
-        <p className="sub">El rector les entrega un Excel con la planta docente. Súbelo aquí cuando lo tengan (necesita internet).</p>
+        <p className="sub">Cuando el rector entregue el Excel con la planta docente, súbelo aquí.</p>
         <Docentes ie={ie} archivo={d.archivos.find((a) => a.institucion_id === ie.id)} />
       </section>
 

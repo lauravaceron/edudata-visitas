@@ -89,7 +89,7 @@ export default function Sedes({ ie, sedes, d }: { ie: Institucion; sedes: Sede[]
                 valor={s.internet_mbps == null ? '' : String(s.internet_mbps)} onGuardar={(v) => set({ internet_mbps: numero(v) })} />
               <span>Mbps</span>
             </div>
-            <small>Mídanla en la sede abriendo <a href="https://fast.com" target="_blank" rel="noreferrer" className="lnk-fast">fast.com</a> en el celular. Si no hay internet, pongan 0.</small>
+            <small>Mídela en la sede abriendo <a href="https://fast.com" target="_blank" rel="noreferrer" className="lnk-fast">fast.com</a> en el celular.</small>
           </div>
           <div className="cbox" style={{ ['--ac' as string]: '#1F5FAD' }}>
             <label className="lbl" htmlFor="f-pcs">Cantidad de computadores</label>

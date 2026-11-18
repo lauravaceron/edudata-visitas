@@ -40,7 +40,7 @@ export default function Inicio({ d }: { d: Datos }) {
       </section>
 
       <section className="block">
-        <h2>¿A cuál IE van hoy?</h2>
+        <h2>¿A qué IE vas hoy?</h2>
         <p className="sub">Búscala y entra a su ficha para registrar la visita.</p>
         <label className="bigsearch" htmlFor="qh"><Icon n="search" />
           <input id="qh" placeholder="Nombre de la IE o de una de sus sedes" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" />
@@ -57,7 +57,7 @@ export default function Inicio({ d }: { d: Datos }) {
       {curso.length > 0 && (
         <section className="block">
           <h2>Para terminar</h2>
-          <p className="sub">Ya las visitaron, pero les falta algo.</p>
+          <p className="sub">Ya se visitaron, pero les falta algo.</p>
           <div className="cont">
             {curso.map(({ ie, p }) => (
               <Link key={ie.id} to={`/ie/${ie.id}`}>
