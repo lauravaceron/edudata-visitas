@@ -49,13 +49,49 @@ export function exportarExcel(d: Datos) {
   });
   const hojaTipos = d.tipos.map((t) => ({ Tipo: t.nombre, Categoría: cat(t.categoria_id), Oficial: t.oficial ? 'Sí' : 'No (por revisar)', 'Creado en': t.creado_en_ie ?? '' }));
 
+  // ---- Resumen por sede: una fila por sede, una columna por cada tipo de espacio ----
+  const ordenCat = (id: string) => d.categorias.find((c) => c.id === id)?.orden ?? 99;
+  const tiposUsados = new Set(d.espacios.map((e) => e.tipo_espacio_id));
+  const columnasTipo = d.tipos
+    .filter((t) => t.oficial || tiposUsados.has(t.id))
+    .sort((a, b) => ordenCat(a.categoria_id) - ordenCat(b.categoria_id) || a.nombre.localeCompare(b.nombre, 'es'));
+  const ubic = (b?: number | null) => (b == null ? 'Sí' : b === 0 ? 'Zona abierta' : 'Bloque ' + b);
+  const ordenComuna = (id: string) => d.comunas.find((c) => c.id === id)?.orden ?? 99;
+  const hojaResumen = d.sedes
+    .filter((s) => d.ies.some((i) => i.id === s.institucion_id))
+    .map((s) => ({ s, ie: ieDe(s.institucion_id) }))
+    .sort((a, b) => ordenComuna(a.ie.comuna_id) - ordenComuna(b.ie.comuna_id) || a.ie.nombre.localeCompare(b.ie.nombre, 'es') || Number(b.s.principal) - Number(a.s.principal))
+    .map(({ s, ie }) => {
+      const es = d.espacios.filter((e) => e.sede_id === s.id);
+      const p = progreso(ie, d);
+      const fila: Record<string, unknown> = {
+        Comuna: C(ie.comuna_id), IE: ie.nombre, 'Código DANE': ie.dane ?? '', Sede: s.nombre,
+        'Sede principal': s.principal ? 'Sí' : 'No',
+        'Estado de la IE': p.estado === 'ok' ? 'Completa' : p.estado === 'curso' ? 'Le falta algo' : 'Sin visitar',
+        'Fecha visita': ie.fecha_visita ?? '', 'Registrado por': ie.registrado_por ?? '',
+        Atendió: ie.atendio ?? '', Cargo: ie.atendio_cargo ?? '', Cédula: ie.atendio_cedula ?? '',
+        'Excel docentes': d.archivos.some((a) => a.institucion_id === ie.id) ? 'Entregado' : 'Pendiente',
+        Bloques: s.bloques, 'Internet (Mbps)': s.internet_mbps ?? '', Computadores: s.computadores ?? '',
+        'Total espacios': es.length,
+      };
+      for (const c of d.categorias) fila['N.° ' + c.nombre] = es.filter((e) => tipo(e.tipo_espacio_id)?.categoria_id === c.id).length;
+      // Cada tipo: "No", o dónde está ("Bloque 2", "Zona abierta"; "Sí" si no se indicó el bloque)
+      for (const t of columnasTipo) {
+        const suyos = es.filter((e) => e.tipo_espacio_id === t.id);
+        fila[t.nombre] = suyos.length ? [...new Set(suyos.map((e) => ubic(e.bloque)))].join(', ') : 'No';
+      }
+      return fila;
+    });
+
   const wb = XLSX.utils.book_new();
   const hojas: [string, Record<string, unknown>[]][] = [
-    ['IE', hojaIE], ['Sedes', hojaSedes], ['Espacios', hojaEsp], ['Laboratorios', hojaLabs], ['Docentes', hojaDoc], ['Tipos de espacio', hojaTipos],
+    ['Resumen por sede', hojaResumen], ['IE', hojaIE], ['Sedes', hojaSedes], ['Espacios', hojaEsp], ['Laboratorios', hojaLabs], ['Docentes', hojaDoc], ['Tipos de espacio', hojaTipos],
   ];
   for (const [nombre, filas] of hojas) {
     const ws = XLSX.utils.json_to_sheet(filas.length ? filas : [{ 'Sin datos': '' }]);
     const cols = Object.keys(filas[0] ?? {});
+    // filtros en el encabezado
+    if (filas.length) ws['!autofilter'] = { ref: XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: filas.length, c: cols.length - 1 } }) };
     ws['!cols'] = cols.map((c) => ({ wch: Math.min(50, Math.max(c.length + 2, ...filas.map((r) => String(r[c] ?? '').length + 1))) }));
     XLSX.utils.book_append_sheet(wb, ws, nombre);
   }
