@@ -21,7 +21,7 @@ export async function actualizarIE(id: string, cambios: Partial<Institucion>) {
   if (ie) await guardar('instituciones', { ...ie, ...cambios });
 }
 export async function crearIE(nombre: string, comuna_id: string, sedes: string[], dane: string | null = null) {
-  const ie: Institucion = { id: nuevoId(), nombre, comuna_id, dane, fecha_visita: null, registrado_por: null, atendio: null, notas: '' };
+  const ie: Institucion = { id: nuevoId(), nombre, comuna_id, dane, fecha_visita: null, registrado_por: null, atendio: null, atendio_cargo: null, atendio_cedula: null, notas: '' };
   await guardar('instituciones', ie);
   for (let i = 0; i < sedes.length; i++) await crearSede(ie.id, sedes[i], i === 0, i);
   return ie;

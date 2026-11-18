@@ -65,7 +65,14 @@ export default function FichaIE({ d }: { d: Datos }) {
               {ie.registrado_por && !d.equipo.some((i) => i.nombre === ie.registrado_por) && <option>{ie.registrado_por}</option>}
             </select></div>
           <div><label className="lbl" htmlFor="f-at">¿Quién los atendió?</label>
-            <Campo id="f-at" valor={ie.atendio ?? ''} onGuardar={(v) => set({ atendio: v || null })} placeholder="Nombre y cargo" /></div>
+            <Campo id="f-at" valor={ie.atendio ?? ''} onGuardar={(v) => set({ atendio: v || null })} placeholder="Nombre completo" /></div>
+          <div><label className="lbl" htmlFor="f-cargo">Cargo</label>
+            <select className="inp" style={{ width: '100%' }} id="f-cargo" value={ie.atendio_cargo ?? ''} onChange={(e) => set({ atendio_cargo: e.target.value || null })}>
+              <option value="">Elegir…</option>
+              {['Rector(a)', 'Coordinador(a)', 'Docente', 'Secretario(a)', 'Otro'].map((c) => <option key={c}>{c}</option>)}
+            </select></div>
+          <div><label className="lbl" htmlFor="f-ced">Cédula</label>
+            <Campo id="f-ced" valor={ie.atendio_cedula ?? ''} onGuardar={(v) => set({ atendio_cedula: v.replace(/[^\d]/g, '') || null })} inputMode="numeric" placeholder="Solo números" /></div>
         </div></div>
       </section>
 

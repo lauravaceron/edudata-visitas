@@ -16,7 +16,7 @@ export function exportarExcel(d: Datos) {
     return {
       Comuna: C(ie.comuna_id), IE: ie.nombre, 'Código DANE': ie.dane ?? '',
       Estado: p.estado === 'ok' ? 'Completa' : p.estado === 'curso' ? 'Le falta algo' : 'Sin visitar',
-      'Fecha visita': ie.fecha_visita ?? '', 'Registrado por': ie.registrado_por ?? '', Atendió: ie.atendio ?? '',
+      'Fecha visita': ie.fecha_visita ?? '', 'Registrado por': ie.registrado_por ?? '', Atendió: ie.atendio ?? '', Cargo: ie.atendio_cargo ?? '', Cédula: ie.atendio_cedula ?? '',
       'N.° sedes': d.sedes.filter((s) => s.institucion_id === ie.id).length, Notas: ie.notas,
     };
   });
@@ -28,6 +28,7 @@ export function exportarExcel(d: Datos) {
       'Internet (Mbps)': s.internet_mbps ?? '', Computadores: s.computadores ?? '',
       'Biblioteca o sala de lectura': ts.some((t) => t?.categoria_id === 'lectura') ? 'Sí' : ts.length ? 'No' : '',
       'N.° laboratorios': ts.filter((t) => t?.categoria_id === 'laboratorios').length,
+      'N.° talleres': ts.filter((t) => t?.categoria_id === 'talleres').length,
       Accesibilidad: ts.filter((t) => t?.categoria_id === 'accesibilidad').map((t) => t!.nombre).join(', '),
       'N.° espacios': ts.length,
     };
@@ -41,7 +42,7 @@ export function exportarExcel(d: Datos) {
       Ubicación: e.bloque == null ? 'Sin asignar' : e.bloque === 0 ? 'Zona abierta' : 'Bloque ' + e.bloque,
       'Tipo nuevo': t?.oficial ? 'No' : 'Sí' }];
   });
-  const hojaLabs = hojaEsp.filter((r) => r.Categoría === 'Laboratorios' || /laborator|planta|taller|robot/i.test(r.Espacio));
+  const hojaLabs = hojaEsp.filter((r) => r.Categoría === 'Laboratorios' || /laborator|planta|robot/i.test(r.Espacio));
   const hojaDoc = d.ies.map((ie) => {
     const a = d.archivos.find((x) => x.institucion_id === ie.id);
     return { Comuna: C(ie.comuna_id), IE: ie.nombre, 'Excel de docentes': a ? a.nombre : 'Pendiente', 'Fecha de subida': a ? a.subido_en.slice(0, 10) : '' };

@@ -8,6 +8,8 @@ export type Institucion = {
   fecha_visita: string | null;
   registrado_por: string | null;
   atendio: string | null;
+  atendio_cargo?: string | null;
+  atendio_cedula?: string | null;
   notas: string;
   updated_at?: string;
 };
