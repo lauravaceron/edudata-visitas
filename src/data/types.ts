@@ -34,7 +34,8 @@ export type TipoEspacio = {
   creado_en_ie: string | null;
 };
 
-export type EspacioSede = { id: string; sede_id: string; tipo_espacio_id: string };
+/** bloque: 1, 2, 3… = número de bloque; 0 = zona abierta; null = sin asignar */
+export type EspacioSede = { id: string; sede_id: string; tipo_espacio_id: string; bloque?: number | null };
 
 export type ArchivoDocentes = {
   id: string;

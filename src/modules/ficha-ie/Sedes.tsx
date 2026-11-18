@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { actualizarSede, agregarEspacio, crearSede, eliminarSede, quitarEspacio, tipoPorNombre } from '../../data/repos';
+import { actualizarSede, agregarEspacio, cambiarBloque, crearSede, eliminarSede, quitarEspacio, tipoPorNombre } from '../../data/repos';
 import type { Institucion, Sede } from '../../data/types';
 import { Campo, Icon, useToast } from '../../shared/ui';
 import type { Datos } from '../../shared/useDatos';
@@ -111,13 +111,23 @@ export default function Sedes({ ie, sedes, d }: { ie: Institucion; sedes: Sede[]
               <div key={c.id} className={'cat' + (suyos.length ? ' has' : '')} style={{ ['--ac' as string]: c.color }}>
                 <div className="cat-h"><i /><b>{c.nombre}</b>{c.prioridad && <span className="star">Prioridad</span>}<span className="cnt">{suyos.length || ''}</span></div>
                 {suyos.length > 0 && (
-                  <div className="tags">
+                  <div className="esp-list">
                     {suyos.map((e) => {
                       const nm = tipo(e.tipo_espacio_id)?.nombre ?? 'Espacio';
+                      const b = e.bloque ?? null;
                       return (
-                        <span key={e.id} className="tag">{nm}
-                          <button onClick={() => { void quitarEspacio(e.id); toast(nm + ' quitado'); }} aria-label={'Quitar ' + nm} title="Quitar"><Icon n="x" /></button>
-                        </span>
+                        <div key={e.id} className="esp-row">
+                          <span className="esp-nom">{nm}</span>
+                          <select className={'bloque-sel' + (b === null ? ' vacio' : '')} value={b === null ? '' : String(b)}
+                            aria-label={'Dónde está ' + nm}
+                            onChange={(ev) => { const v = ev.target.value; void cambiarBloque(e.id, v === '' ? null : Number(v)); }}>
+                            <option value="">¿Dónde está?</option>
+                            {Array.from({ length: s.bloques }, (_, k) => <option key={k} value={k + 1}>Bloque {k + 1}</option>)}
+                            {b !== null && b > s.bloques && <option value={b}>Bloque {b} (ya no existe)</option>}
+                            <option value="0">Zona abierta</option>
+                          </select>
+                          <button className="x" onClick={() => { void quitarEspacio(e.id); toast(nm + ' quitado'); }} aria-label={'Quitar ' + nm} title="Quitar"><Icon n="x" /></button>
+                        </div>
                       );
                     })}
                   </div>

@@ -37,7 +37,9 @@ export function exportarExcel(d: Datos) {
     const ie = ieDe(s.institucion_id); if (!ie) return [];
     const t = tipo(e.tipo_espacio_id);
     return [{ Comuna: C(ie.comuna_id), IE: ie.nombre, Sede: s.nombre, 'Sede principal': s.principal ? 'Sí' : 'No',
-      Categoría: cat(t?.categoria_id), Espacio: t?.nombre ?? '', 'Tipo nuevo': t?.oficial ? 'No' : 'Sí' }];
+      Categoría: cat(t?.categoria_id), Espacio: t?.nombre ?? '',
+      Ubicación: e.bloque == null ? 'Sin asignar' : e.bloque === 0 ? 'Zona abierta' : 'Bloque ' + e.bloque,
+      'Tipo nuevo': t?.oficial ? 'No' : 'Sí' }];
   });
   const hojaLabs = hojaEsp.filter((r) => r.Categoría === 'Laboratorios' || /laborator|planta|taller|robot/i.test(r.Espacio));
   const hojaDoc = d.ies.map((ie) => {

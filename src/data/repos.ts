@@ -64,10 +64,14 @@ export async function eliminarSede(id: string) {
 
 /* ---------- Espacios ---------- */
 export async function agregarEspacio(sede_id: string, tipo_espacio_id: string) {
-  const e: EspacioSede = { id: nuevoId(), sede_id, tipo_espacio_id };
+  const e: EspacioSede = { id: nuevoId(), sede_id, tipo_espacio_id, bloque: null };
   await guardar('espacios', e);
 }
 export const quitarEspacio = (id: string) => borrar('espacios', id);
+export async function cambiarBloque(id: string, bloque: number | null) {
+  const e = await db.espacios.get(id);
+  if (e) await guardar('espacios', { ...e, bloque });
+}
 
 /** Busca un tipo con ese nombre; si no existe, lo crea como "nuevo, por revisar". */
 export async function tipoPorNombre(nombre: string, categoria_id: string, ieNombre: string) {
@@ -88,6 +92,13 @@ export async function unirTipos(desde: string, hacia: string) {
   const es = await db.espacios.where('tipo_espacio_id').equals(desde).toArray();
   for (const e of es) await guardar('espacios', { ...e, tipo_espacio_id: hacia });
   await borrar('tipos', desde);
+}
+
+/** Elimina un tipo de espacio y lo quita de todas las sedes donde estaba registrado. */
+export async function eliminarTipo(id: string) {
+  const es = await db.espacios.where('tipo_espacio_id').equals(id).toArray();
+  for (const e of es) await borrar('espacios', e.id);
+  await borrar('tipos', id);
 }
 
 /* ---------- Equipo ---------- */

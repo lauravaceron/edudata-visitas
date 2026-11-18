@@ -298,3 +298,11 @@ button.drop{font:inherit;color:inherit}
 .ie-form{display:grid;grid-template-columns:2fr 1fr auto;gap:14px;align-items:end;background:#fff;color:var(--ink);border-radius:14px;padding:16px}
 .ie-form-btns{display:flex;gap:8px}
 @media (max-width:760px){.ie-form{grid-template-columns:1fr}}
+
+/* espacios con su bloque */
+.esp-list{display:flex;flex-direction:column;gap:6px}
+.esp-row{display:flex;align-items:center;gap:8px;background:color-mix(in srgb,var(--ac) 8%,#fff);border:1px solid color-mix(in srgb,var(--ac) 30%,var(--line));border-radius:12px;padding:6px 6px 6px 12px}
+.esp-nom{flex:1;min-width:0;font-weight:600;font-size:14px}
+.bloque-sel{border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 8px;font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;max-width:150px}
+.bloque-sel.vacio{color:#9A5E07;border-color:#F0CF94;background:var(--mango-suave)}
+.aviso-borrar{font-size:13px;color:#8E3420;align-self:center}
